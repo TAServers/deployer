@@ -12,7 +12,7 @@ import config from "./config";
 const server = express();
 const app = new GitHubApp(config.appId, config.privateKey);
 
-server.get("/:repository", async (req, res, next) => {
+server.post("/:repository", async (req, res, next) => {
 	try {
 		const repository = req.params.repository;
 		const token = await app.getInstallationToken();
