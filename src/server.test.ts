@@ -63,7 +63,9 @@ describe("POST /:repository", () => {
 		const res = await request(server).post("/repository");
 
 		expect(res.statusCode).toBe(500);
-		expect(res.text).toMatchInlineSnapshot(`"Failed to access repository folder. Please contact a system administrator."`);
+		expect(res.text).toMatchInlineSnapshot(
+			`"Failed to access repository folder. Please contact a system administrator."`
+		);
 	});
 
 	test("responds with status 500 when folder to pull is not a git repository", async () => {
@@ -73,6 +75,8 @@ describe("POST /:repository", () => {
 		const res = await request(server).post("/repository");
 
 		expect(res.statusCode).toBe(500);
-		expect(res.text).toMatchInlineSnapshot(`"Folder exists but has not been initialised as a repository on the server or is not the repo's root."`);
+		expect(res.text).toMatchInlineSnapshot(
+			`"Folder exists but has not been initialised as a repository on the server or is not the repo's root."`
+		);
 	});
 });

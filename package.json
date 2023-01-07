@@ -7,7 +7,9 @@
 		"start": "nodemon src/index.ts",
 		"build": "rimraf dist && tsc -p .",
 		"lint": "eslint . --ext .ts",
-		"test": "jest"
+		"test": "jest",
+		"format": "prettier --check .",
+		"format:fix": "prettier --write ."
 	},
 	"repository": {
 		"type": "git",
@@ -29,6 +31,7 @@
 		"eslint": "^8.31.0",
 		"jest": "^29.3.1",
 		"nodemon": "^2.0.20",
+		"prettier": "^2.8.2",
 		"rimraf": "^3.0.2",
 		"supertest": "^6.3.3",
 		"ts-jest": "^29.0.3",
