@@ -5,6 +5,7 @@
 	"main": "dist/index.js",
 	"scripts": {
 		"start": "nodemon src/index.ts",
+		"start:prod": "cross-env NODE_ENV=production node dist/index.js",
 		"build": "rimraf dist && tsc -p .",
 		"lint": "eslint . --ext .ts",
 		"test": "jest",
