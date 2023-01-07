@@ -63,5 +63,6 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: build
+          path: build
 
-      - run: ls -r
+      - run: ls
