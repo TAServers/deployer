@@ -54,3 +54,13 @@ jobs:
         with:
           name: build
           path: dist
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: build
+
+      - run: ls -r
