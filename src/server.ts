@@ -1,7 +1,7 @@
 import path from "path";
 
 import express, { Request, Response, NextFunction } from "express";
-import { GitConstructError } from "simple-git";
+import { GitConstructError, GitError } from "simple-git";
 
 import { GitHubApp } from "./GitHubApp";
 import * as git from "./git";
@@ -45,6 +45,10 @@ server.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 			.send(
 				"Failed to access repository folder. Please contact a system administrator."
 			);
+	}
+
+	if (err instanceof GitError) {
+		return res.status(500).send("Failed to access remote repository.");
 	}
 
 	console.error(err);

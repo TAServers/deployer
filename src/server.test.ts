@@ -1,13 +1,15 @@
 import request from "supertest";
 import server from "./server";
-import { GitConstructError } from "simple-git";
+import { GitConstructError, GitError } from "simple-git";
 
 import { isDirectory } from "./isDirectory";
 import { pull, clone, FolderNotRepository } from "./git";
 
 jest.mock("simple-git", () => {
 	class GitConstructError extends Error {}
-	return { GitConstructError };
+	class GitError extends Error {}
+
+	return { GitConstructError, GitError };
 });
 
 jest.mock("./config", () => ({
@@ -63,6 +65,7 @@ describe("POST /:repository", () => {
 		const res = await request(server).post("/repository");
 
 		expect(res.statusCode).toBe(500);
+		expect(res.text).not.toBe("Internal Server Error");
 		expect(res.text).toMatchInlineSnapshot(
 			`"Failed to access repository folder. Please contact a system administrator."`
 		);
@@ -75,8 +78,22 @@ describe("POST /:repository", () => {
 		const res = await request(server).post("/repository");
 
 		expect(res.statusCode).toBe(500);
+		expect(res.text).not.toBe("Internal Server Error");
 		expect(res.text).toMatchInlineSnapshot(
 			`"Folder exists but has not been initialised as a repository on the server or is not the repo's root."`
+		);
+	});
+
+	test("responds with status 500 when an internal git error occurs", async () => {
+		(isDirectory as jest.Mock).mockResolvedValue(true);
+		(pull as jest.Mock).mockRejectedValue(new GitError());
+
+		const res = await request(server).post("/repository");
+
+		expect(res.statusCode).toBe(500);
+		expect(res.text).not.toBe("Internal Server Error");
+		expect(res.text).toMatchInlineSnapshot(
+			`"Failed to access remote repository."`
 		);
 	});
 });
