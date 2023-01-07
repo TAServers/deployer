@@ -35,19 +35,24 @@ if (!isDirectorySync(repoFolder)) {
 const privateKey = fs.readFileSync(privateKeyPath).toString();
 const app = new GitHubApp(appId, privateKey);
 
-server.get("/:repository", async (req, res) => {
-	const repository = req.params.repository;
-	const token = await app.getInstallationToken();
+server.get("/:repository", async (req, res, next) => {
+	try {
+		const repository = req.params.repository;
+		const token = await app.getInstallationToken();
 
-	if (await isDirectory(path.join(repoFolder, repository))) {
-		await git.pull(token, repoFolder, repository);
-		res.sendStatus(200);
-	} else {
-		await git.clone(token, repoFolder, repository);
-		res.sendStatus(200);
+		if (await isDirectory(path.join(repoFolder, repository))) {
+			await git.pull(token, repoFolder, repository);
+			res.sendStatus(200);
+		} else {
+			await git.clone(token, repoFolder, repository);
+			res.sendStatus(200);
+		}
+	} catch (err) {
+		next(err);
 	}
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 server.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 	if (err instanceof git.FolderNotRepository) {
 		return res
