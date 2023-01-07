@@ -13,11 +13,24 @@ import { GitHubApp } from "./GitHubApp";
 dotenv.config();
 
 const server = express();
-const port = process.env.PORT;
+const port = process.env.PORT ?? 3000;
 const appId = process.env.APP_ID;
-const privateKey = fs.readFileSync(process.env.PRIVATE_KEY).toString();
+const privateKeyPath = process.env.PRIVATE_KEY;
 const repoFolder = process.env.REPOSITORY_FOLDER;
 
+if (!appId) {
+	throw new Error("Environment variable APP_ID not set");
+}
+
+if (!privateKeyPath) {
+	throw new Error("Environment variable PRIVATE_KEY not set");
+}
+
+if (!repoFolder) {
+	throw new Error("Environment variable REPOSITORY_FOLDER not set");
+}
+
+const privateKey = fs.readFileSync(privateKeyPath).toString();
 const app = new GitHubApp(appId, privateKey);
 
 server.get("/:repository", async (req, res) => {
