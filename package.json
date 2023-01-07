@@ -7,7 +7,7 @@
 		"start": "nodemon src/index.ts",
 		"build": "rimraf dist && tsc -p .",
 		"lint": "eslint . --ext .ts",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "jest"
 	},
 	"repository": {
 		"type": "git",
