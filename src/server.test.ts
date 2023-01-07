@@ -1,8 +1,14 @@
 import request from "supertest";
 import server from "./server";
+import { GitConstructError } from "simple-git";
 
 import { isDirectory } from "./isDirectory";
-import { pull, clone } from "./git";
+import { pull, clone, FolderNotRepository } from "./git";
+
+jest.mock("simple-git", () => {
+	class GitConstructError extends Error {}
+	return { GitConstructError };
+});
 
 jest.mock("./config", () => ({
 	appId: 1234,
@@ -17,9 +23,7 @@ jest.mock("./GitHubApp", () => {
 		}
 	}
 
-	return {
-		GitHubApp,
-	};
+	return { GitHubApp };
 });
 
 jest.mock("./isDirectory");
@@ -31,7 +35,7 @@ afterEach(() => {
 
 describe("POST /:repository", () => {
 	test("pulls changes", async () => {
-		(isDirectory as jest.Mock).mockReturnValue(true);
+		(isDirectory as jest.Mock).mockResolvedValue(true);
 
 		const res = await request(server).post("/repository");
 
@@ -41,12 +45,34 @@ describe("POST /:repository", () => {
 	});
 
 	test("clones repository", async () => {
-		(isDirectory as jest.Mock).mockReturnValue(false);
+		(isDirectory as jest.Mock).mockResolvedValue(false);
 
 		const res = await request(server).post("/repository");
 
 		expect(res.statusCode).toBe(200);
 		expect(clone).toHaveBeenCalledTimes(1);
 		expect(clone).toHaveBeenCalledWith("token", "folder", "repository");
+	});
+
+	test("responds with status 500 when containing folder does not exist", async () => {
+		(isDirectory as jest.Mock).mockResolvedValue(false);
+		(clone as jest.Mock).mockRejectedValue(
+			new (GitConstructError as unknown as jest.Mock)()
+		);
+
+		const res = await request(server).post("/repository");
+
+		expect(res.statusCode).toBe(500);
+		expect(res.text).toMatchInlineSnapshot(`"Failed to access repository folder. Please contact a system administrator."`);
+	});
+
+	test("responds with status 500 when folder to pull is not a git repository", async () => {
+		(isDirectory as jest.Mock).mockResolvedValue(true);
+		(pull as jest.Mock).mockRejectedValue(new FolderNotRepository());
+
+		const res = await request(server).post("/repository");
+
+		expect(res.statusCode).toBe(500);
+		expect(res.text).toMatchInlineSnapshot(`"Folder exists but has not been initialised as a repository on the server or is not the repo's root."`);
 	});
 });
