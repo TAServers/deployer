@@ -9,7 +9,10 @@
 		"lint": "eslint . --ext .ts",
 		"test": "jest",
 		"format": "prettier --check .",
-		"format:fix": "prettier --write ."
+		"format:fix": "prettier --write .",
+		"pm2:start": "cross-env NODE_ENV=production pm2 start ./dist/index.js --name deployer",
+		"pm2:stop": "pm2 stop deployer",
+		"pm2:reload": "pm2 reload deployer"
 	},
 	"repository": {
 		"type": "git",
@@ -39,6 +42,7 @@
 		"typescript": "^4.9.4"
 	},
 	"dependencies": {
+		"cross-env": "^7.0.3",
 		"dotenv": "^16.0.3",
 		"express": "^4.18.2",
 		"octokit": "^2.0.11",
