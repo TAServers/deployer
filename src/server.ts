@@ -2,6 +2,7 @@ import path from "path";
 
 import express, { Request, Response, NextFunction } from "express";
 import { GitConstructError, GitError } from "simple-git";
+import morgan from "morgan";
 
 import { GitHubApp } from "./GitHubApp";
 import * as git from "./git";
@@ -11,6 +12,8 @@ import config from "./config";
 
 const server = express();
 const app = new GitHubApp(config.appId, config.privateKey);
+
+server.use(morgan("combined"));
 
 server.post("/:repository", async (req, res, next) => {
 	try {
@@ -31,6 +34,8 @@ server.post("/:repository", async (req, res, next) => {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 server.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+	console.error(err);
+
 	if (err instanceof git.FolderNotRepository) {
 		return res
 			.status(500)
@@ -51,7 +56,6 @@ server.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 		return res.status(500).send("Failed to access remote repository.");
 	}
 
-	console.error(err);
 	res.sendStatus(500);
 });
 
