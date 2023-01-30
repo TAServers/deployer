@@ -10,9 +10,12 @@ export async function pull(token: string, folder: string, repository: string) {
 		throw new FolderNotRepository();
 	}
 
-	await git.pull(
-		`https://x-access-token:${token}@github.com/TAServers/${repository}.git`
-	);
+	await git.remote([
+		"set-url",
+		"origin",
+		`https://x-access-token:${token}@github.com/TAServers/${repository}.git`,
+	]);
+	await git.pull();
 }
 
 export async function clone(token: string, folder: string, repository: string) {

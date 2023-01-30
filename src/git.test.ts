@@ -5,18 +5,23 @@ jest.mock("simple-git");
 
 describe("pull", () => {
 	test("calls SimpleGit.pull with valid remote url", async () => {
+		const remoteMock = jest.fn();
 		const pullMock = jest.fn();
 		(simpleGit as jest.Mock).mockReturnValue({
 			checkIsRepo: async () => true,
+			remote: remoteMock,
 			pull: pullMock,
 		});
 
 		await pull("token", "b", "repository");
 
+		expect(remoteMock).toHaveBeenCalledTimes(1);
+		expect(remoteMock).toHaveBeenCalledWith([
+			"set-url",
+			"origin",
+			"https://x-access-token:token@github.com/TAServers/repository.git",
+		]);
 		expect(pullMock).toHaveBeenCalledTimes(1);
-		expect(pullMock).toHaveBeenCalledWith(
-			"https://x-access-token:token@github.com/TAServers/repository.git"
-		);
 	});
 
 	test("throws FolderNotRepository error when SimpleGit.checkIsRepo returns false", async () => {
